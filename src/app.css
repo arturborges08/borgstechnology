@@ -100,3 +100,15 @@ video{width:100%;max-height:440px;background:#000;border-radius:14px}
 .review{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px}
 @media (max-width:760px){.review{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.btn,.nav a,.progress>i{transition:none}.btn:active{transform:none}}
+
+/* OAuth */
+.oauth-group{display:grid;gap:10px}
+.btn.oauth{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:rgba(255,255,255,.04);background-image:none;border:1px solid rgba(255,255,255,.14);color:#F4EFEA;font-weight:600}
+.btn.oauth:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24)}
+.btn.oauth.apple{background:#F4EFEA;color:#0B0807;border-color:#F4EFEA}
+.btn.oauth.apple:hover:not(:disabled){background:#fff}
+.btn.oauth:disabled{opacity:.5;cursor:not-allowed}
+.btn.oauth .soon{font-style:normal;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:inherit;opacity:.85}
+.btn.oauth.apple .soon{background:rgba(0,0,0,.08)}
+.or{display:flex;align-items:center;gap:12px;color:rgba(244,239,234,.5);font-size:12px;margin-top:4px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.1)}

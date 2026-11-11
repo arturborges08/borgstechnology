@@ -4,7 +4,7 @@ Site e plataforma da Borgs: coleta de vídeo em primeira pessoa no Brasil, sob e
 
 - `index.html` + `src/landing.*`: site público (EN/PT) com formulário de pedido de piloto.
 - `app.html` + `src/main.tsx` + `src/pages/`: área do colaborador e painel admin (React + Supabase).
-- `server.mjs`: servidor estático usado no Railway (`npm run build` e depois `npm start`).
+- `server.mjs`: servidor estático usado no Railway (`npm run build` e `npm start`).
 - `public/logo-*.svg`: logo. `brand/borgs-brandkit.png`: brand kit.
 
 ## Rodar local
