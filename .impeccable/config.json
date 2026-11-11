@@ -1,0 +1,44 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-11T11:11:14.733Z",
+        "reason": "user references (dark glass dashboards and glowing app-icon logos sent in chat) ask for warm orange light; kept to console, CTA and form"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-11T11:11:14.740Z",
+        "reason": "user reference (cinematic landing with serif headlines) sent in chat; serif limited to one accent phrase per heading"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-11T11:12:45.987Z",
+        "reason": "Claude: the inner card is a phone mockup of the contributor app shown inside the contributor section, a device frame rather than a nested content card"
+      },
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-11T11:12:45.995Z",
+        "reason": "Claude: the blinking dot is the REC indicator on the sample video in the review console, a literal recording signal, not a decorative liveness dot"
+      }
+    ]
+  }
+}
