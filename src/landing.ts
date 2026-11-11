@@ -60,3 +60,17 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+
+// Se já existe uma sessão salva neste navegador, o botão do topo abre o app em vez de pedir login de novo.
+try {
+  const raw = localStorage.getItem('sb-fouirbbndfopnijnnwkx-auth-token');
+  const sess = raw ? JSON.parse(raw) : null;
+  if (sess && sess.refresh_token) {
+    const a = document.querySelector<HTMLAnchorElement>('a.signin');
+    if (a) {
+      a.href = '/app/';
+      const en = a.querySelector('[data-l="en"]'); const pt = a.querySelector('[data-l="pt"]');
+      if (en) en.textContent = 'Open app'; if (pt) pt.textContent = 'Abrir app';
+    }
+  }
+} catch { /* sem acesso ao armazenamento: segue com o botão Entrar */ }

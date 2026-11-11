@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { listarEstados, buscarEstados, carregarMunicipios, type ApiMunicipios } from 'municipios-brasil';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { supabase, brl, fmtDate, fmtDur, errMsg } from '../supabase';
 import { useAuth } from '../session';
@@ -11,10 +12,40 @@ export const STATUS_LABEL: Record<string, [string, string]> = {
 export const Pill = ({ s }: { s: string }) => { const [t, c] = STATUS_LABEL[s] || [s, 'neutral']; return <span className={`pill ${c}`}>{t}</span>; };
 const CAT: Record<string, string> = { household: 'Doméstica', workplace: 'Local de trabalho', other: 'Outra' };
 
+const lines = (t: string) => String(t || '').split('\n').map((x) => x.trim()).filter(Boolean);
+
 function profileComplete(p: any) { return !!(p?.full_name && p?.phone && p?.city && p?.state && p?.device); }
 
+function InstallBanner() {
+  const [evt, setEvt] = useState<any>(null);
+  const [hidden, setHidden] = useState(() => { try { return localStorage.getItem('borgs-install-dismissed') === '1'; } catch { return false; } });
+  const standalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true);
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const ios = /iPhone|iPad|iPod/.test(ua);
+  useEffect(() => {
+    const h = (e: any) => { e.preventDefault(); setEvt(e); };
+    window.addEventListener('beforeinstallprompt', h);
+    return () => window.removeEventListener('beforeinstallprompt', h);
+  }, []);
+  if (standalone || hidden || (!evt && !ios)) return null;
+  const close = () => { setHidden(true); try { localStorage.setItem('borgs-install-dismissed', '1'); } catch { /* ignora */ } };
+  return (
+    <div className="card install" role="region" aria-label="Instalar o app">
+      <img src="/icon-192.png" alt="" width="44" height="44" />
+      <div className="stack" style={{ gap: 4, flex: 1, minWidth: 0 }}>
+        <b>Instale o app Borgs</b>
+        {evt
+          ? <span className="small muted">Abre direto da tela inicial, sem barra do navegador.</span>
+          : <span className="small muted">No Safari, toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</span>}
+      </div>
+      {evt && <button className="btn sm" onClick={async () => { evt.prompt(); await evt.userChoice.catch(() => null); setEvt(null); }}>Instalar</button>}
+      <button className="btn sm ghost" onClick={close} aria-label="Fechar">Agora não</button>
+    </div>
+  );
+}
+
 export function Home() {
-  const { profile } = useAuth();
+  const { profile, consented } = useAuth();
   const [bal, setBal] = useState<any>(null);
   const [counts, setCounts] = useState<{ pending: number; approved: number; rejected: number }>({ pending: 0, approved: 0, rejected: 0 });
   useEffect(() => {
@@ -27,6 +58,29 @@ export function Home() {
     <>
       <div className="page-head"><div><h1>Olá{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}</h1>
         <p>Grave tarefas em primeira pessoa e receba por vídeo aprovado.</p></div></div>
+      <InstallBanner />
+      {(() => {
+        const total = counts.pending + counts.approved + counts.rejected;
+        const steps: { label: string; done: boolean; to?: string; cta?: string }[] = [
+          { label: 'Criar cadastro', done: true },
+          { label: 'Completar perfil', done: profileComplete(profile), to: '/perfil', cta: 'Completar perfil' },
+          { label: 'Aceitar o termo de participação', done: consented || profile?.role === 'admin', to: '/termo', cta: 'Ler e aceitar o termo' },
+          { label: 'Cadastro aprovado pela equipe', done: profile?.status === 'approved' },
+          { label: 'Enviar o primeiro vídeo', done: total > 0, to: '/tarefas', cta: 'Ver tarefas' },
+        ];
+        const done = steps.filter((x) => x.done).length;
+        if (done === steps.length) return null;
+        const next = steps.find((x) => !x.done)!;
+        return (
+          <div className="card stack mission" aria-label="Primeira missão">
+            <div className="row" style={{ justifyContent: 'space-between' }}><span className="eyebrow">Primeira missão</span><span className="small muted num">{done} de {steps.length}</span></div>
+            <h2>{next.label}</h2>
+            <div className="steps" role="list">{steps.map((x) => <span key={x.label} role="listitem" className={x.done ? 'on' : x === next ? 'now' : ''} title={x.label} />)}</div>
+            <ul className="mission-list">{steps.map((x) => <li key={x.label} className={x.done ? 'done' : ''}>{x.label}</li>)}</ul>
+            {next.to ? <div className="row"><Link className="btn" to={next.to}>{next.cta}</Link></div> : <p className="small muted">Estamos revisando seu cadastro. Você será liberado assim que for aprovado.</p>}
+          </div>
+        );
+      })()}
       {profile?.status === 'pending' && (
         <div className="alert warn">Seu cadastro está em análise. Você verá as tarefas assim que for aprovado. {profileComplete(profile) ? '' : 'Complete seu perfil para agilizar a aprovação.'}</div>
       )}
@@ -83,19 +137,36 @@ export function Consent() {
   );
 }
 
+function toUf(v: string): string {
+  if (!v) return '';
+  const t = v.trim();
+  const byUf = listarEstados().find((u: any) => u.uf === t.toUpperCase());
+  if (byUf) return byUf.uf;
+  try { return (buscarEstados(t)[0] as any)?.uf || ''; } catch { return ''; }
+}
+
 export function Profile() {
   const { profile, refresh } = useAuth();
+  const [muni, setMuni] = useState<ApiMunicipios | null>(null);
+  useEffect(() => { carregarMunicipios().then(setMuni).catch(() => setMuni(null)); }, []);
   const [f, setF] = useState<any>({ full_name: '', phone: '', city: '', state: '', device: '', pix_key: '' });
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [err, setErr] = useState('');
-  useEffect(() => { if (profile) setF({ full_name: profile.full_name || '', phone: profile.phone || '', city: profile.city || '', state: profile.state || '', device: profile.device || '', pix_key: profile.pix_key || '' }); }, [profile]);
+  useEffect(() => { if (profile) setF({ full_name: profile.full_name || '', phone: profile.phone || '', city: profile.city || '', state: toUf(profile.state || '') || '', device: profile.device || '', pix_key: profile.pix_key || '' }); }, [profile?.id]);
   const set = (k: string) => (e: any) => setF({ ...f, [k]: e.target.value });
+  const cities = useMemo(() => (muni && f.state ? muni.porEstado(f.state as any).map((m: any) => m.nome) : []), [muni, f.state]);
   async function save(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setMsg(''); setErr('');
+    e.preventDefault(); setMsg(''); setErr('');
+    if (muni && f.state) {
+      const ok = cities.some((c: string) => c.toLowerCase() === String(f.city).trim().toLowerCase());
+      if (!ok) { setErr('Escolha uma cidade da lista do estado selecionado.'); return; }
+    }
+    setBusy(true);
     const clean: any = {}; Object.keys(f).forEach((k) => (clean[k] = String(f[k]).trim()));
     const { error } = await supabase.from('profiles').update(clean).eq('id', profile!.id);
     setBusy(false); if (error) setErr(errMsg(error)); else { setMsg('Perfil salvo.'); refresh(); }
   }
   return (
+    <>
     <form className="card stack" style={{ maxWidth: 640 }} onSubmit={save}>
       <div className="row" style={{ justifyContent: 'space-between' }}><h1>Perfil</h1><Pill s={profile!.status} /></div>
       {msg && <div className="alert ok" role="status">{msg}</div>}
@@ -104,12 +175,28 @@ export function Profile() {
       <div className="grid2">
         <label>Telefone / WhatsApp<input id="pf-phone" type="tel" autoComplete="tel" maxLength={40} required value={f.phone} onChange={set('phone')} /></label>
         <label>Aparelho de gravação<span className="hint">Ex.: iPhone 12, Galaxy A54</span><input id="pf-device" maxLength={120} required value={f.device} onChange={set('device')} /></label>
-        <label>Cidade<input id="pf-city" maxLength={80} required value={f.city} onChange={set('city')} /></label>
-        <label>Estado<input id="pf-state" maxLength={40} required value={f.state} onChange={set('state')} /></label>
+        <label>Estado
+          <select id="pf-state" required value={f.state} onChange={(e) => setF({ ...f, state: e.target.value, city: '' })}>
+            <option value="">Selecione o estado</option>
+            {listarEstados().map((u: any) => <option key={u.uf} value={u.uf}>{u.uf} · {u.nome}</option>)}
+          </select>
+        </label>
+        <label>Cidade<span className="hint">{f.state ? 'Comece a digitar e escolha na lista.' : 'Escolha o estado primeiro.'}</span>
+          <input id="pf-city" list="pf-city-list" maxLength={80} required disabled={!f.state} autoComplete="off" value={f.city} onChange={set('city')} />
+          <datalist id="pf-city-list">{cities.map((c: string) => <option key={c} value={c} />)}</datalist>
+        </label>
       </div>
       <label>Chave Pix<span className="hint">Usada apenas para pagar seus saques.</span><input id="pf-pix" maxLength={140} value={f.pix_key} onChange={set('pix_key')} /></label>
       <div className="row"><button className="btn" disabled={busy}>{busy ? 'Salvando…' : 'Salvar perfil'}</button></div>
     </form>
+      <div className="card stack" style={{ maxWidth: 640 }}>
+        <h2>Conta</h2>
+        <div className="row">
+          {profile?.role === 'admin' && <Link className="btn ghost" to="/admin">Painel admin</Link>}
+          <button type="button" className="btn ghost" onClick={async () => { await supabase.auth.signOut(); }}>Sair da conta</button>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -117,6 +204,7 @@ export function Tasks() {
   const { profile } = useAuth();
   const [tasks, setTasks] = useState<any[] | null>(null);
   const [mine, setMine] = useState<Record<number, number>>({});
+  const [q, setQ] = useState(''); const [cat, setCat] = useState('all');
   useEffect(() => {
     supabase.from('tasks').select('*').eq('active', true).order('created_at', { ascending: false }).then(({ data }) => setTasks(data || []));
     supabase.from('submissions').select('task_id,status').eq('user_id', profile!.id).neq('status', 'rejected').then(({ data }) => {
@@ -127,8 +215,16 @@ export function Tasks() {
   return (
     <>
       <div className="page-head"><div><h1>Tarefas disponíveis</h1><p>O valor é pago por vídeo aprovado. Leia as instruções antes de gravar.</p></div></div>
+      {tasks && tasks.length > 0 && (
+        <div className="filters">
+          <input id="tk-search" type="search" placeholder="Buscar tarefa" aria-label="Buscar tarefa" value={q} onChange={(e) => setQ(e.target.value)} />
+          <div className="chips" role="group" aria-label="Categoria">
+            {[['all', 'Todas'], ...Object.entries(CAT)].map(([k, v]) => <button type="button" key={k} className={`chip${cat === k ? ' on' : ''}`} aria-pressed={cat === k} onClick={() => setCat(k)}>{v}</button>)}
+          </div>
+        </div>
+      )}
       {tasks === null ? <p className="muted">Carregando…</p> : tasks.length === 0 ? <div className="empty">Nenhuma tarefa aberta agora. Volte em breve.</div> : (
-        <div className="grid2">{tasks.map((t) => {
+        <div className="grid2">{tasks.filter((t) => (cat === 'all' || t.category === cat) && t.title.toLowerCase().includes(q.trim().toLowerCase())).map((t) => {
           const used = mine[t.id] || 0; const full = used >= t.max_per_user;
           return (
             <div key={t.id} className="card task">
@@ -215,9 +311,16 @@ export function TaskDetail() {
         <Link className="small" to="/tarefas">← Tarefas</Link>
         <h1>{task.title}</h1>
         <div className="meta"><b className="num" style={{ color: 'var(--fg)' }}>{brl(task.pay_cents)} por vídeo aprovado</b><span>{fmtDur(task.min_seconds)} a {fmtDur(task.max_seconds)}</span></div>
-        <h2>Instruções</h2>
-        <p className="pre">{task.instructions || 'Sem instruções adicionais.'}</p>
-        <div className="alert info small">Regras de sempre: celular na altura dos olhos, mãos visíveis, boa luz, sem rostos de outras pessoas, sem telas ou documentos aparecendo.</div>
+        <h2>O que gravar</h2>
+        {lines(task.instructions).length > 1
+          ? <ol className="guide">{lines(task.instructions).map((l, i) => <li key={i}><span className="num">{String(i + 1).padStart(2, '0')}</span>{l}</li>)}</ol>
+          : <p className="pre">{task.instructions || 'Sem instruções adicionais.'}</p>}
+        <h2>Antes de gravar</h2>
+        <ul className="check-list">{(lines(task.before_checklist).length ? lines(task.before_checklist) : ['Celular na altura dos olhos', 'Mãos visíveis no enquadramento', 'Lente limpa e boa luz', 'Sem rostos de outras pessoas, telas ou documentos aparecendo']).map((l, i) => <li key={i}>{l}</li>)}</ul>
+        {lines(task.reject_reasons).length > 0 && (
+          <details className="reject"><summary>O que pode levar a uma recusa</summary>
+            <ul>{lines(task.reject_reasons).map((l, i) => <li key={i}>{l}</li>)}</ul></details>
+        )}
       </div>
       <div className="card stack">
         <h2>Enviar vídeo</h2>
@@ -259,14 +362,16 @@ export function Submissions() {
 
 export function Wallet() {
   const { profile } = useAuth();
-  const [bal, setBal] = useState<any>(null); const [rows, setRows] = useState<any[]>([]);
+  const [bal, setBal] = useState<any>(null); const [rows, setRows] = useState<any[]>([]); const [review, setReview] = useState(0);
   const [amount, setAmount] = useState(''); const [busy, setBusy] = useState(false); const [err, setErr] = useState(''); const [msg, setMsg] = useState('');
   async function load() {
-    const [{ data: b }, { data: p }] = await Promise.all([
+    const [{ data: b }, { data: p }, { data: sub }] = await Promise.all([
       supabase.rpc('balance_for', { uid: profile!.id }),
       supabase.from('payouts').select('*').eq('user_id', profile!.id).order('requested_at', { ascending: false }),
+      supabase.from('submissions').select('tasks(pay_cents)').eq('user_id', profile!.id).eq('status', 'pending'),
     ]);
     setBal(b?.[0] || null); setRows(p || []);
+    setReview((sub || []).reduce((a: number, r: any) => a + (r.tasks?.pay_cents || 0), 0));
   }
   useEffect(() => { load(); }, [profile]);
   async function request(e: React.FormEvent) {
@@ -283,6 +388,7 @@ export function Wallet() {
       <div className="page-head"><div><h1>Carteira</h1><p>Valores de vídeos aprovados. Os saques são pagos por Pix, manualmente, depois da solicitação.</p></div></div>
       <div className="grid3">
         <div className="card stat"><span>Disponível para saque</span><b>{brl(bal?.available_cents)}</b></div>
+        <div className="card stat"><span>Em análise</span><b>{brl(review)}</b><small className="muted">Só vira saldo se o vídeo for aprovado.</small></div>
         <div className="card stat"><span>Saques solicitados</span><b>{brl(bal?.requested_cents)}</b></div>
         <div className="card stat"><span>Total já pago</span><b>{brl(bal?.paid_cents)}</b></div>
       </div>

@@ -86,7 +86,7 @@ function Review() {
   );
 }
 
-const emptyTask = { title: '', category: 'household', instructions: '', min_seconds: 60, max_seconds: 600, pay: '0,00', max_per_user: 3, active: false };
+const emptyTask = { title: '', category: 'household', instructions: '', before_checklist: '', reject_reasons: '', min_seconds: 60, max_seconds: 600, pay: '0,00', max_per_user: 3, active: false };
 
 function TasksAdmin() {
   const [rows, setRows] = useState<any[]>([]); const [f, setF] = useState<any>(emptyTask); const [editing, setEditing] = useState<number | null>(null);
@@ -97,7 +97,7 @@ function TasksAdmin() {
   function edit(t: any) { setEditing(t.id); setMsg(''); setErr(''); setF({ ...t, pay: (t.pay_cents / 100).toFixed(2).replace('.', ',') }); window.scrollTo({ top: 0 }); }
   async function save(e: React.FormEvent) {
     e.preventDefault(); setErr(''); setMsg('');
-    const row = { title: f.title.trim(), category: f.category, instructions: f.instructions, min_seconds: Number(f.min_seconds), max_seconds: Number(f.max_seconds),
+    const row = { title: f.title.trim(), category: f.category, instructions: f.instructions, before_checklist: f.before_checklist || '', reject_reasons: f.reject_reasons || '', min_seconds: Number(f.min_seconds), max_seconds: Number(f.max_seconds),
       pay_cents: Math.round(parseFloat(String(f.pay).replace(/\./g, '').replace(',', '.')) * 100), max_per_user: Number(f.max_per_user), active: !!f.active };
     if (isNaN(row.pay_cents) || row.pay_cents < 0) { setErr('Valor por vídeo inválido.'); return; }
     if (row.max_seconds < row.min_seconds) { setErr('A duração máxima precisa ser maior que a mínima.'); return; }
@@ -120,7 +120,9 @@ function TasksAdmin() {
           <label>Duração mínima (s)<input id="tk-min" type="number" min={0} value={f.min_seconds} onChange={set('min_seconds')} /></label>
           <label>Duração máxima (s)<input id="tk-maxs" type="number" min={1} value={f.max_seconds} onChange={set('max_seconds')} /></label>
         </div>
-        <label>Instruções<textarea id="tk-inst" value={f.instructions} onChange={set('instructions')} /></label>
+        <label>O que gravar<span className="hint">Uma instrução por linha. Aparece numerada para o colaborador.</span><textarea id="tk-inst" value={f.instructions} onChange={set('instructions')} /></label>
+        <label>Antes de gravar (checklist)<span className="hint">Uma linha por item. Ex.: Lente limpa e luz suficiente.</span><textarea id="tk-before" value={f.before_checklist} onChange={set('before_checklist')} /></label>
+        <label>O que leva a recusa<span className="hint">Uma linha por motivo. Quanto mais claro, menos vídeos recusados.</span><textarea id="tk-reject" value={f.reject_reasons} onChange={set('reject_reasons')} /></label>
         <label className="check"><input id="tk-active" type="checkbox" checked={!!f.active} onChange={set('active')} />Publicada (colaboradores aprovados veem e podem enviar)</label>
         <div className="alert warn small">Só publique uma tarefa paga quando houver comprador ou verba para pagar todos os vídeos aprovados.</div>
         <div className="row"><button className="btn" disabled={busy}>{editing ? 'Salvar alterações' : 'Criar tarefa'}</button>{editing && <button type="button" className="btn ghost" onClick={() => { setEditing(null); setF(emptyTask); }}>Cancelar</button>}</div>

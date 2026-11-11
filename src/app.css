@@ -112,3 +112,50 @@ video{width:100%;max-height:440px;background:#000;border-radius:14px}
 .btn.oauth.apple .soon{background:rgba(0,0,0,.08)}
 .or{display:flex;align-items:center;gap:12px;color:rgba(244,239,234,.5);font-size:12px;margin-top:4px}
 .or::before,.or::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.1)}
+
+/* Missão, filtros, guia da tarefa */
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FF9A3D}
+.mission{border-color:rgba(255,138,42,.28);background:linear-gradient(180deg,rgba(255,138,42,.08),rgba(255,255,255,.02))}
+.mission h2{margin:0}
+.steps{display:flex;gap:6px}.steps span{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.1)}
+.steps span.on{background:#4ADE80}.steps span.now{background:#FF9A3D}
+.mission-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.92rem;color:var(--muted)}
+.mission-list li::before{content:"○";margin-right:8px}.mission-list li.done{color:var(--fg)}.mission-list li.done::before{content:"✓";color:#4ADE80}
+.filters{display:grid;gap:10px;margin-bottom:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.86rem;font-weight:600;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:99px;padding:7px 14px;cursor:pointer}
+.chip.on{color:#1A0D04;background:#FF9A3D;border-color:#FF9A3D}
+.guide{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.guide li{display:grid;grid-template-columns:2.2em 1fr;gap:6px}.guide .num{color:#FF9A3D;font-weight:700}
+.check-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.check-list li{display:grid;grid-template-columns:1.4em 1fr}.check-list li::before{content:"✓";color:#4ADE80;font-weight:700}
+details.reject{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:rgba(255,255,255,.03)}
+details.reject summary{cursor:pointer;font-weight:600}details.reject ul{margin:10px 0 0;padding-left:1.2em;color:var(--muted)}
+.stat small{display:block;margin-top:4px;font-size:.78rem}
+
+/* ---- Modo app (celular / tela inicial) ---- */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+a,button,summary,.chip{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.brand{min-height:44px}
+.tabbar{display:none}
+.install{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-color:rgba(255,138,42,.28)}
+.install img{border-radius:10px}
+@media (max-width:760px){
+  body{font-size:16px}
+  input,select,textarea{font-size:16px}
+  .topbar{padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:12px;flex-wrap:nowrap}
+  .topbar .nav{display:none}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px));background:rgba(12,8,6,.9);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.7rem;font-weight:600;transition:color 150ms ease,background-color 150ms ease}
+  .tabbar a.active{color:#FF9A3D}
+  .tabbar a:active{background:rgba(255,255,255,.06)}
+  main{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  .btn{min-height:46px}
+  .btn.sm{min-height:40px}
+  .grid2,.grid3{grid-template-columns:minmax(0,1fr)}
+  h1{font-size:1.6rem}
+}
+@media (display-mode: standalone){
+  body{-webkit-user-select:none;user-select:none}
+  input,textarea,select,.pre{-webkit-user-select:text;user-select:text}
+}
