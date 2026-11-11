@@ -62,7 +62,7 @@ function Review() {
         <div className="review">
           <div className="card stack">
             {url ? <video key={url} src={url} controls playsInline preload="metadata" /> : <div className="empty">Carregando vídeo…</div>}
-            <div className="meta"><span>{cur.tasks?.title}</span><span className="num">{fmtDur(cur.duration_seconds)}</span><span className="num">{cur.width}×{cur.height}</span><span className="num">{((cur.file_size || 0) / 1048576).toFixed(1)} MB</span>{cur.capture?.source === 'app_camera' && <span className="pill neutral" title="Verificação feita no aparelho do colaborador">Gravado no app · mãos no quadro {cur.capture.hands_in_frame_pct}% · {cur.capture.pauses} pausa(s)</span>}</div>
+            <div className="meta"><span>{cur.tasks?.title}</span><span className="num">{fmtDur(cur.duration_seconds)}</span><span className="num">{cur.width}×{cur.height}</span><span className="num">{((cur.file_size || 0) / 1048576).toFixed(1)} MB</span>{cur.capture?.source === 'app_camera' && <span className="pill neutral" title="Verificação feita no aparelho do colaborador">Gravado no app · mãos no quadro {cur.capture.hands_in_frame_pct}% · validação automática: {cur.capture.ai_check?.approved ? 'aprovado' : 'reprovado'}</span>}</div>
             <p className="small">Enviado por <b>{cur.profiles?.full_name || 'sem nome'}</b> ({[cur.profiles?.city, cur.profiles?.state].filter(Boolean).join(', ') || 'local não informado'}) em {fmtDate(cur.created_at)}.</p>
             {cur.note && <div className="alert info small">Observação do colaborador: {cur.note}</div>}
           </div>

@@ -4,14 +4,12 @@ import { supabase, brl, fmtDur, errMsg } from '../supabase';
 import { useAuth } from '../session';
 import { MAX_UPLOAD_BYTES } from '../config';
 import { uploadWithProgress } from './collector';
-import { bbox, judgeFraming, loadHands } from '../handtrack';
+import { bbox, judgeFraming, judgeRecording, loadHands, sampleQuality, type Verdict } from '../handtrack';
 
-type Phase = 'tutorial' | 'starting' | 'aligning' | 'countdown' | 'recording' | 'paused' | 'review' | 'sending';
-const CAMERA_PHASES: Phase[] = ['starting', 'aligning', 'countdown', 'recording', 'paused'];
+type Phase = 'tutorial' | 'starting' | 'aligning' | 'countdown' | 'recording' | 'review' | 'sending';
+const CAMERA_PHASES: Phase[] = ['starting', 'aligning', 'countdown', 'recording'];
 
 const STABLE_START_MS = 1200;   // mãos enquadradas por este tempo antes de começar a contagem
-const STABLE_RESUME_MS = 600;   // mãos de volta por este tempo para retomar a gravação
-const LOST_PAUSE_MS = 1500;     // mãos fora do quadro por este tempo pausam a gravação
 const COUNTDOWN_S = 3;
 const SIZE_STOP = MAX_UPLOAD_BYTES * 0.94;
 
@@ -50,7 +48,7 @@ export function Record() {
   const [msg, setMsg] = useState(''); const [ok, setOk] = useState(false);
   const [elapsed, setElapsed] = useState(0); const [sizeMb, setSizeMb] = useState(0); const [count, setCount] = useState(COUNTDOWN_S);
   const [err, setErr] = useState(''); const [portrait, setPortrait] = useState(false); const [noAudio, setNoAudio] = useState(false);
-  const [result, setResult] = useState<{ url: string; blob: Blob; seconds: number; w: number; h: number; mime: string; handsPct: number; pauses: number } | null>(null);
+  const [result, setResult] = useState<{ url: string; blob: Blob; seconds: number; w: number; h: number; mime: string; handsPct: number; luma: number | null; sharp: number | null; verdict: Verdict } | null>(null);
   const [progress, setProgress] = useState(0);
 
   const phaseRef = useRef<Phase>('tutorial');
@@ -60,7 +58,8 @@ export function Record() {
   const chunksRef = useRef<Blob[]>([]); const sizeRef = useRef(0);
   const handsRef = useRef<any>(null); const rafRef = useRef(0); const lastDetect = useRef(0);
   const okSince = useRef<number | null>(null); const lostSince = useRef<number | null>(null); const countStart = useRef(0); const countFail = useRef<number | null>(null);
-  const recMs = useRef(0); const lastTick = useRef(0); const stats = useRef({ samples: 0, okSamples: 0, pauses: 0 });
+  const recMs = useRef(0); const lastTick = useRef(0); const stats = useRef({ samples: 0, okSamples: 0 });
+  const qual = useRef<{ luma: number[]; sharp: number[]; last: number }>({ luma: [], sharp: [], last: 0 }); const qCanvas = useRef<HTMLCanvasElement | null>(null);
   const msgRef = useRef(''); const okRef = useRef(false); const lockRef = useRef<any>(null); const taskRef = useRef<any>(null);
   const resultUrl = useRef('');
 
@@ -99,7 +98,7 @@ export function Record() {
     streamRef.current = stream;
     const v = videoRef.current!; v.srcObject = stream; v.muted = true;
     try { await v.play(); } catch { /* o navegador tenta tocar sozinho */ }
-    recMs.current = 0; stats.current = { samples: 0, okSamples: 0, pauses: 0 }; sizeRef.current = 0; okSince.current = null; lostSince.current = null;
+    recMs.current = 0; stats.current = { samples: 0, okSamples: 0 }; qual.current = { luma: [], sharp: [], last: 0 }; sizeRef.current = 0; okSince.current = null; lostSince.current = null;
     setElapsed(0); setSizeMb(0); setPhase('aligning'); say('Preparando o verificador de mãos…', false);
     loop();
   }
@@ -142,12 +141,13 @@ export function Record() {
       const left = COUNTDOWN_S - Math.floor((now - countStart.current) / 1000);
       if (left <= 0) startRecording(); else setCount(left);
     } else if (p === 'recording') {
+      // a gravação segue normalmente; as mãos só são conferidas para a validação final
       stats.current.samples++; if (f.ok) stats.current.okSamples++;
-      if (f.ok) { lostSince.current = null; say('Gravando', true); }
-      else { lostSince.current ??= now; say(f.reason, false); if (now - lostSince.current >= LOST_PAUSE_MS) pauseRec(); }
-    } else if (p === 'paused') {
-      if (f.ok) { okSince.current ??= now; if (now - okSince.current >= STABLE_RESUME_MS) resumeRec(); else say('Mãos de volta. Retomando…', true); }
-      else { okSince.current = null; say(`Gravação pausada. ${f.reason}`, false); }
+      say(f.ok ? 'Gravando' : `Gravando. ${f.reason}`, f.ok);
+      if (now - qual.current.last >= 1000) {
+        qual.current.last = now; qCanvas.current ??= document.createElement('canvas');
+        const q = sampleQuality(v, qCanvas.current); if (q) { qual.current.luma.push(q.luma); qual.current.sharp.push(q.sharp); }
+      }
     }
   }
 
@@ -160,10 +160,8 @@ export function Record() {
     chunksRef.current = []; sizeRef.current = 0; recMs.current = 0; lastTick.current = performance.now();
     rec.ondataavailable = (e) => { if (e.data && e.data.size) { chunksRef.current.push(e.data); sizeRef.current += e.data.size; setSizeMb(sizeRef.current / 1048576); if (sizeRef.current > SIZE_STOP) stopRec(); } };
     rec.onstop = () => finish(rec.mimeType || mime || 'video/webm');
-    rec.start(1000); recRef.current = rec; lostSince.current = null; setPhase('recording'); say('Gravando', true);
+    rec.start(1000); recRef.current = rec; setPhase('recording'); say('Gravando', true);
   }
-  function pauseRec() { try { recRef.current?.pause(); } catch { /* ignora */ } stats.current.pauses++; okSince.current = null; setPhase('paused'); }
-  function resumeRec() { try { recRef.current?.resume(); } catch { /* ignora */ } lastTick.current = performance.now(); lostSince.current = null; setPhase('recording'); say('Gravando', true); }
   function stopRec() { try { if (recRef.current && recRef.current.state !== 'inactive') recRef.current.stop(); } catch { /* ignora */ } }
 
   function finish(mime: string) {
@@ -171,7 +169,12 @@ export function Record() {
     const blob = new Blob(chunksRef.current, { type: mime });
     const url = URL.createObjectURL(blob); if (resultUrl.current) URL.revokeObjectURL(resultUrl.current); resultUrl.current = url;
     const s = stats.current;
-    setResult({ url, blob, seconds: Math.round((recMs.current / 1000) * 10) / 10, w: Number(settings.width) || 0, h: Number(settings.height) || 0, mime, handsPct: s.samples ? Math.round((s.okSamples / s.samples) * 100) : 0, pauses: s.pauses });
+    const seconds = Math.round((recMs.current / 1000) * 10) / 10; const w = Number(settings.width) || 0, h = Number(settings.height) || 0;
+    const handsPct = s.samples ? Math.round((s.okSamples / s.samples) * 100) : 0;
+    const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
+    const luma = avg(qual.current.luma), sharp = avg(qual.current.sharp);
+    const verdict = judgeRecording({ handsPct, seconds, minSeconds: taskRef.current?.min_seconds ?? 0, w, h, luma, sharp });
+    setResult({ url, blob, seconds, w, h, mime, handsPct, luma, sharp, verdict });
     cleanupCamera(); setPhase('review');
   }
 
@@ -198,7 +201,7 @@ export function Record() {
       const { error } = await supabase.from('submissions').insert({
         task_id: task.id, user_id: profile!.id, storage_path: path, file_size: file.size,
         duration_seconds: result.seconds, width: result.w || null, height: result.h || null,
-        capture: { source: 'app_camera', hands_in_frame_pct: result.handsPct, pauses: result.pauses, mime: result.mime, note: 'verificação feita no aparelho do colaborador' },
+        capture: { source: 'app_camera', hands_in_frame_pct: result.handsPct, mime: result.mime, note: 'verificação feita no aparelho do colaborador', ai_check: { approved: result.verdict.approved, version: result.verdict.version, checks: result.verdict.checks.map((c) => ({ label: c.label, ok: c.ok, detail: c.detail })), luma: result.luma == null ? null : Math.round(result.luma), sharp: result.sharp == null ? null : Math.round(result.sharp) } },
       });
       if (error) throw error;
       nav('/envios', { replace: true, state: { sent: true } });
@@ -224,12 +227,12 @@ export function Record() {
         <div className="rec-top">
           <button type="button" className="rec-x" onClick={closeCamera} aria-label="Fechar câmera">×</button>
           <span className="rec-title">{task.title}</span>
-          <span className={`rec-time num${phase === 'recording' ? ' live' : ''}`}>{phase === 'recording' || phase === 'paused' ? <><i />{mmss(elapsed)} / {mmss(task.max_seconds)} · {sizeMb.toFixed(0)} MB</> : ''}</span>
+          <span className={`rec-time num${phase === 'recording' ? ' live' : ''}`}>{phase === 'recording' ? <><i />{mmss(elapsed)} / {mmss(task.max_seconds)} · {sizeMb.toFixed(0)} MB</> : ''}</span>
         </div>
         {phase === 'countdown' && <div className="rec-count" aria-hidden="true">{count}</div>}
         <div className="rec-bottom">
           <div className={`rec-status${ok ? ' ok' : ''}`} role="status" aria-live="polite">{msg}</div>
-          {(phase === 'recording' || phase === 'paused') && (
+          {phase === 'recording' && (
             <button type="button" className="btn rec-stop" disabled={!canStop} onClick={stopRec}>{canStop ? 'Parar e revisar' : `Pare a partir de ${fmtDur(task.min_seconds)}`}</button>
           )}
         </div>
@@ -244,7 +247,7 @@ export function Record() {
           <ol className="guide">
             <li><span className="num">01</span><span><b>Suporte de cabeça.</b> Prenda o celular no suporte, na <b>altura dos olhos</b>, com a câmera de trás apontando para a frente. Sem suporte a imagem balança e o vídeo costuma ser recusado.</span></li>
             <li><span className="num">02</span><span><b>Celular na horizontal.</b> A câmera só abre com o celular deitado.</span></li>
-            <li><span className="num">03</span><span><b>As duas mãos no quadro.</b> O app confere sozinho. A gravação <b>só começa</b> quando as duas mãos estão inteiras no quadro e <b>pausa</b> se uma delas sair.</span></li>
+            <li><span className="num">03</span><span><b>As duas mãos no quadro.</b> O app confere sozinho. A gravação <b>só começa</b> quando as duas mãos estão inteiras no quadro. Depois ela segue normalmente, e ao final o app confere se o vídeo ficou bom.</span></li>
             <li><span className="num">04</span><span><b>Boa luz e lente limpa.</b> Sem rostos de outras pessoas, telas ou documentos aparecendo.</span></li>
           </ol>
           <div className="alert info small">Tarefa: <b>{task.title}</b>. Valor: <b>{brl(task.pay_cents)}</b> por vídeo aprovado. Duração: {fmtDur(task.min_seconds)} a {fmtDur(task.max_seconds)}. A conferência das mãos roda no seu aparelho; o vídeo só é enviado quando você tocar em enviar.</div>
@@ -258,14 +261,16 @@ export function Record() {
         <div className="card stack" style={{ maxWidth: 640 }}>
           <h1>Revise sua gravação</h1>
           <video className="rec-review" src={result.url} controls playsInline />
-          <div className="meta"><span className="num">Duração {fmtDur(result.seconds)}</span>{result.w > 0 && <span className="num">{result.w}×{result.h}</span>}<span className="num">{(result.blob.size / 1048576).toFixed(1)} MB</span><span className="num">Mãos no quadro {result.handsPct}%</span></div>
+          <div className="meta"><span className="num">Duração {fmtDur(result.seconds)}</span>{result.w > 0 && <span className="num">{result.w}×{result.h}</span>}<span className="num">{(result.blob.size / 1048576).toFixed(1)} MB</span></div>
+          <div className={`alert ${result.verdict.approved ? 'ok' : 'error'}`} role="status"><b>{result.verdict.approved ? 'Validação automática: aprovado' : 'Validação automática: reprovado. Grave de novo'}</b>
+            <ul className="check-list" style={{ marginTop: 8 }}>{result.verdict.checks.map((c) => <li key={c.label}>{c.ok ? '✓' : '✗'} {c.label}: {c.detail}</li>)}</ul>
+            <span className="small">Conferência feita no seu aparelho. Depois do envio, uma pessoa da Borgs ainda revisa o vídeo.</span></div>
           {noAudio && <div className="alert warn small">Esta gravação ficou sem áudio (microfone não liberado).</div>}
-          {result.seconds < task.min_seconds && <div className="alert error">A gravação tem {fmtDur(result.seconds)}. O mínimo desta tarefa é {fmtDur(task.min_seconds)}. Grave de novo.</div>}
           {result.blob.size > MAX_UPLOAD_BYTES && <div className="alert error">O arquivo passou de 50 MB. Grave um trecho mais curto.</div>}
           {err && <div className="alert error" role="alert">{err}</div>}
           {phase === 'sending' && <div className="stack"><div className="progress" aria-label="Progresso do envio"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div><span className="small muted num">{Math.round(progress * 100)}% enviado. Não feche esta página.</span></div>}
           <div className="row">
-            <button className="btn" onClick={send} disabled={phase === 'sending' || result.seconds < task.min_seconds || result.blob.size > MAX_UPLOAD_BYTES}>{phase === 'sending' ? 'Enviando…' : 'Enviar para revisão'}</button>
+            <button className="btn" onClick={send} disabled={phase === 'sending' || !result.verdict.approved || result.blob.size > MAX_UPLOAD_BYTES}>{phase === 'sending' ? 'Enviando…' : 'Enviar para revisão'}</button>
             <button className="btn ghost" onClick={again} disabled={phase === 'sending'}>Gravar de novo</button>
           </div>
         </div>
