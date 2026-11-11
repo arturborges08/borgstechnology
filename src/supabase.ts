@@ -14,7 +14,7 @@ export function errMsg(e: any): string {
   if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
   if (/User already registered/i.test(m)) return 'Este e-mail já tem cadastro. Use "Entrar".';
   if (/Password should be at least/i.test(m)) return 'A senha precisa ter pelo menos 6 caracteres.';
-  if (/email rate limit|over_email_send_rate_limit/i.test(m)) return 'O envio de e-mails de confirmação atingiu o limite agora. Tente de novo mais tarde ou entre com Google/Apple.';
+  if (/email rate limit|over_email_send_rate_limit/i.test(m)) return 'O envio de e-mails de confirmação atingiu o limite agora. Tente de novo mais tarde ou entre com Google.';
   if (/provider is not enabled|Unsupported provider/i.test(m)) return 'Este método de login ainda não está ativado.';
   if (/rate limit/i.test(m)) return 'Muitas tentativas em pouco tempo. Espere alguns minutos e tente de novo.';
   if (/pix key missing/i.test(m)) return 'Cadastre sua chave Pix no Perfil antes de pedir saque.';
