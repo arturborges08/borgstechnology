@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mediapipe/tasks-vision": "^1.2.2",
     "@supabase/supabase-js": "^2.45.4",
     "lucide-react": "^0.454.0",
     "municipios-brasil": "^0.2.1",

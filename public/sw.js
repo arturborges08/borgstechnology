@@ -1,6 +1,6 @@
 // Borgs service worker: guarda o casco do app para abrir rápido e mostrar uma tela offline.
 // Nunca guarda dados da API (Supabase fica em outro domínio e passa direto).
-const VERSION = 'borgs-v1';
+const VERSION = 'borgs-v2';
 const SHELL = ['/app/', '/logo-mark.svg', '/icon-192.png'];
 
 self.addEventListener('install', (e) => {
@@ -16,7 +16,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(fetch(req).then((r) => { const copy = r.clone(); caches.open(VERSION).then((c) => c.put('/app/', copy)); return r; }).catch(() => caches.match('/app/')));
     return;
   }
-  if (url.pathname.startsWith('/assets/')) {
+  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/mediapipe/')) {
     e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((r) => { const copy = r.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); return r; })));
   }
 });

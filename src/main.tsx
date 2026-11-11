@@ -7,6 +7,7 @@ import './app.css';
 import { Login, Signup, Forgot, ResetPassword } from './pages/auth';
 import { Consent, Profile, Tasks, TaskDetail, Submissions, Wallet, Home } from './pages/collector';
 import { Admin } from './pages/admin';
+import { Record } from './pages/record';
 
 const ic = (d: string) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>;
 const ICONS = {
@@ -75,6 +76,7 @@ function App() {
             <Route path="/" element={<Guard><Home /></Guard>} />
             <Route path="/tarefas" element={<Guard><Tasks /></Guard>} />
             <Route path="/tarefas/:id" element={<Guard><TaskDetail /></Guard>} />
+            <Route path="/tarefas/:id/gravar" element={<Guard><Record /></Guard>} />
             <Route path="/envios" element={<Guard><Submissions /></Guard>} />
             <Route path="/carteira" element={<Guard><Wallet /></Guard>} />
             <Route path="/perfil" element={<Guard><Profile /></Guard>} />

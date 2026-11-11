@@ -249,7 +249,7 @@ function readVideoMeta(file: File): Promise<{ duration: number; width: number; h
   });
 }
 
-function uploadWithProgress(path: string, file: File, token: string, onProgress: (p: number) => void): Promise<void> {
+export function uploadWithProgress(path: string, file: File, token: string, onProgress: (p: number) => void): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/videos/${path}`);
@@ -323,7 +323,16 @@ export function TaskDetail() {
         )}
       </div>
       <div className="card stack">
-        <h2>Enviar vídeo</h2>
+        <h2>Gravar</h2>
+        <ul className="check-list">
+          <li>Suporte de cabeça, com o celular na altura dos olhos</li>
+          <li>Celular na horizontal e câmera de trás para a frente</li>
+          <li>As duas mãos sempre dentro do quadro</li>
+        </ul>
+        <p className="small muted">O app confere o enquadramento. A gravação só começa com as duas mãos visíveis e pausa se uma sair do quadro.</p>
+        <div className="row"><Link className="btn" to={`/tarefas/${task.id}/gravar`}>Gravar com o app</Link></div>
+        <details className="reject"><summary>Já tenho o vídeo gravado</summary>
+        <div className="stack" style={{ marginTop: 12 }}>
         <label>Arquivo de vídeo<span className="hint">MP4 ou MOV, até 50 MB.</span>
           <input ref={inputRef} id="td-file" type="file" accept="video/mp4,video/quicktime,video/webm,video/*" onChange={pick} disabled={busy} />
         </label>
@@ -334,6 +343,7 @@ export function TaskDetail() {
         {busy && <div className="stack"><div className="progress" aria-label="Progresso do envio"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div><span className="small muted num">{Math.round(progress * 100)}% enviado. Não feche esta página.</span></div>}
         {err && <div className="alert error" role="alert">{err}</div>}
         <div className="row"><button className="btn" disabled={!file || !meta || !rules || problems.length > 0 || busy} onClick={send}>{busy ? 'Enviando…' : 'Enviar para revisão'}</button></div>
+        </div></details>
       </div>
     </div>
   );
