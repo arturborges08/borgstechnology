@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T00:00:00Z",
+  "title": "Design System: Borgs",
+  "extensions": {
+    "colorMeta": {
+      "warm-black": { "role": "neutral", "displayName": "Warm Black", "tonalRamp": ["#030202", "#070505", "#0F0A08", "#1E1510", "#3A271C", "#6B5546", "#A89A8F", "#EDE6E0"] },
+      "warm-black-raised": { "role": "neutral", "displayName": "Warm Black Raised" },
+      "glass-panel": { "role": "neutral", "displayName": "Glass Panel" },
+      "glass-highlight": { "role": "neutral", "displayName": "Glass Highlight" },
+      "hairline": { "role": "neutral", "displayName": "Hairline" },
+      "hairline-warm": { "role": "neutral", "displayName": "Warm Hairline" },
+      "signal-orange": { "role": "primary", "displayName": "Signal Orange", "tonalRamp": ["#3A1403", "#7A2A06", "#AE3A07", "#C8450A", "#FF6A1A", "#FF9B42", "#FFC08A", "#FFEEE2"] },
+      "amber-light": { "role": "primary", "displayName": "Amber Light" },
+      "apricot": { "role": "primary", "displayName": "Apricot" },
+      "ember": { "role": "primary", "displayName": "Ember" },
+      "action-top": { "role": "primary", "displayName": "Ember Action (top)" },
+      "action-bottom": { "role": "primary", "displayName": "Ember Action (bottom)" },
+      "action-solid": { "role": "primary", "displayName": "Ember Action (flat)" },
+      "action-hover": { "role": "primary", "displayName": "Ember Pressed" },
+      "white": { "role": "neutral", "displayName": "White" },
+      "ash": { "role": "neutral", "displayName": "Ash" },
+      "smoke": { "role": "neutral", "displayName": "Smoke" },
+      "smoke-app": { "role": "neutral", "displayName": "Smoke App" },
+      "approved-green": { "role": "status", "displayName": "Approved Green", "tonalRamp": ["#0B2A16", "#14532D", "#166534", "#22A04B", "#4ADE80", "#86EFAC", "#BBF7D0", "#F0FDF4"] },
+      "approved-green-bg": { "role": "status", "displayName": "Approved Tint" },
+      "pending-amber": { "role": "status", "displayName": "Pending Amber" },
+      "pending-amber-bg": { "role": "status", "displayName": "Pending Tint" },
+      "rejected-coral": { "role": "status", "displayName": "Rejected Coral", "tonalRamp": ["#2E0E07", "#5C1B0E", "#8F2C17", "#C94428", "#FF7A5C", "#FF9F88", "#FFC7B9", "#FFF1ED"] },
+      "rejected-coral-bg": { "role": "status", "displayName": "Rejected Tint" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Landing hero headline only, max 15ch." },
+      "headline": { "displayName": "Headline", "purpose": "Landing section headings, max 20ch." },
+      "accent": { "displayName": "Accent", "purpose": "One italic serif phrase inside a landing headline, Amber Light." },
+      "page-title": { "displayName": "Page Title", "purpose": "App page heading." },
+      "title": { "displayName": "Title", "purpose": "Tile and card headings." },
+      "body": { "displayName": "Body", "purpose": "Landing prose; ledes 1.15rem in Ash, max 58ch." },
+      "body-app": { "displayName": "Body App", "purpose": "Operate screens." },
+      "label-table": { "displayName": "Table Label", "purpose": "Uppercase table column headers only." },
+      "data": { "displayName": "Data", "purpose": "Clip IDs, metadata, chips, REC tag; tabular numerals." }
+    },
+    "shadows": [
+      { "name": "glass-edge", "value": "inset 0 1px 0 rgba(255,255,255,.05)", "purpose": "Every glass tile and card." },
+      { "name": "console-lift", "value": "inset 0 1px 0 rgba(255,255,255,.07), 0 50px 100px -40px rgba(0,0,0,.95), 0 30px 80px -50px rgba(255,106,26,.5)", "purpose": "Hero review console only." },
+      { "name": "float", "value": "inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -24px rgba(0,0,0,.95)", "purpose": "Floating glass cards." },
+      { "name": "warm-glow", "value": "0 40px 90px -50px rgba(255,106,26,.55)", "purpose": "Pilot form and orange feature panel." },
+      { "name": "app-card", "value": "inset 0 1px 0 rgba(243,230,211,.05), 0 20px 40px -28px rgba(0,0,0,.8)", "purpose": "Operate cards." },
+      { "name": "button-bevel", "value": "inset 0 1px 0 rgba(255,255,255,.35), 0 12px 28px -12px rgba(0,0,0,.9)", "purpose": "Primary buttons." },
+      { "name": "focus-halo", "value": "0 0 0 4px rgba(255,138,61,.18)", "purpose": "Input focus on the landing (3px rgba(255,138,42,.22) in the app)." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.23,1,0.32,1)", "purpose": "Every transform and state change." },
+      { "name": "duration-state", "value": "150ms-220ms", "purpose": "Colour, border and transform transitions." },
+      { "name": "press", "value": "transform: scale(.97)", "purpose": "All buttons on :active." },
+      { "name": "cta-border-spin", "value": "conic-gradient border, 3.4s linear infinite", "purpose": "Travelling border on conversion CTAs only." },
+      { "name": "pulse", "value": "white ring 0 to 14px, 2.4s ease-out infinite", "purpose": "Light CTA on the orange feature panel." },
+      { "name": "approve-tick", "value": "stroke-dashoffset draw, 6s loop", "purpose": "Console approve button signature." },
+      { "name": "float-drift", "value": "translateY(-10px), 7s ease-in-out infinite", "purpose": "Floating hero cards." },
+      { "name": "success-check", "value": "circle 700ms then path 450ms, ease-out", "purpose": "Pilot form success." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "760px" },
+      { "name": "tablet", "value": "980px" },
+      { "name": "hide-floats", "value": "1100px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ember gradient slab with white text and trailing arrow; the main action on any surface.",
+      "html": "<button class=\"ds-btn-primary\">Request a pilot <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14M12 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:10px;font:700 1rem Manrope,system-ui,sans-serif;letter-spacing:-.01em;padding:15px 22px;border:0;border-radius:14px;color:#fff;background:linear-gradient(180deg,#C8450A,#AE3A07);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 28px -12px rgba(0,0,0,.9);cursor:pointer;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}.ds-btn-primary svg{transition:transform 200ms cubic-bezier(0.23,1,0.32,1)}.ds-btn-primary:hover{transform:translateY(-2px)}.ds-btn-primary:hover svg{transform:translateX(3px)}.ds-btn-primary:active{transform:scale(.97)}.ds-btn-primary:focus-visible{outline:2px solid #FF9B42;outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Glass secondary action beside a primary.",
+      "html": "<button class=\"ds-btn-ghost\">Record tasks, get paid</button>",
+      "css": ".ds-btn-ghost{font:700 1rem Manrope,system-ui,sans-serif;padding:15px 22px;border:0;border-radius:14px;color:#fff;background:rgba(255,255,255,.045);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09);backdrop-filter:blur(10px);cursor:pointer;transition:background-color 160ms ease,transform 160ms cubic-bezier(0.23,1,0.32,1)}.ds-btn-ghost:hover{background:rgba(255,255,255,.09)}.ds-btn-ghost:active{transform:scale(.97)}.ds-btn-ghost:focus-visible{outline:2px solid #FF9B42;outline-offset:3px}"
+    },
+    {
+      "name": "App Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary-app",
+      "description": "Operate-density primary; flattens to Ember Pressed on hover.",
+      "html": "<button class=\"ds-btn-app\">Send video</button>",
+      "css": ".ds-btn-app{font:600 .92rem Manrope,system-ui,sans-serif;padding:11px 18px;border-radius:11px;border:1px solid #FF6A1A;color:#fff;background-color:#B83E08;background-image:linear-gradient(180deg,#C8450A,#AE3A07);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);cursor:pointer;transition:transform 160ms cubic-bezier(0.23,1,0.32,1),background-color 150ms ease}.ds-btn-app:hover{background:#9E3406;border-color:#9E3406}.ds-btn-app:active{transform:scale(.97)}.ds-btn-app:focus-visible{outline:3px solid #FF9B42;outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Dark inset field with amber focus halo.",
+      "html": "<label class=\"ds-field\">Company<input class=\"ds-input\" placeholder=\"Acme Robotics\"></label>",
+      "css": ".ds-field{display:grid;gap:7px;font:600 .88rem Manrope,system-ui,sans-serif;color:#DCD2CA}.ds-input{font:400 1rem Manrope,system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:13px 14px;caret-color:#FF6A1A;transition:border-color 150ms ease,box-shadow 150ms ease}.ds-input::placeholder{color:#958679}.ds-input:focus{outline:0;border-color:#FF9B42;box-shadow:0 0 0 4px rgba(255,138,61,.18)}"
+    },
+    {
+      "name": "Glass Tile",
+      "kind": "card",
+      "refersTo": "tile",
+      "description": "Frosted panel with icon tile; warms and lifts on hover.",
+      "html": "<div class=\"ds-tile\"><span class=\"ds-tile-ic\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></svg></span><h3>Signed consent</h3><p>Every contributor signs before recording.</p></div>",
+      "css": ".ds-tile{display:grid;gap:12px;padding:26px;border-radius:22px;background:rgba(30,21,16,.64);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);color:#fff;font-family:Manrope,system-ui,sans-serif;transition:border-color 200ms ease,transform 200ms cubic-bezier(0.23,1,0.32,1)}.ds-tile h3{margin:0;font-size:1.18rem;font-weight:700;letter-spacing:-.02em}.ds-tile p{margin:0;color:#DCD2CA;font-size:.98rem}.ds-tile-ic{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(255,106,26,.14);color:#FF9B42}.ds-tile:hover{border-color:rgba(255,138,61,.28);transform:translateY(-3px)}"
+    },
+    {
+      "name": "Status Pills",
+      "kind": "chip",
+      "refersTo": "pill-approved",
+      "description": "Semantic review states: approved, pending, rejected, neutral.",
+      "html": "<span class=\"ds-pill ds-ok\">Approved</span> <span class=\"ds-pill ds-warn\">Pending</span> <span class=\"ds-pill ds-bad\">Rejected</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;font:700 .75rem Manrope,system-ui,sans-serif;padding:3px 9px;border-radius:999px;white-space:nowrap}.ds-ok{background:rgba(74,222,128,.12);color:#4ADE80}.ds-warn{background:rgba(255,155,66,.14);color:#FFB061}.ds-bad{background:rgba(255,122,92,.12);color:#FF7A5C}"
+    },
+    {
+      "name": "Data Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Monospace spec chips; the selected one turns warm.",
+      "html": "<span class=\"ds-chip\">1080p</span> <span class=\"ds-chip ds-chip-on\">head-mounted</span>",
+      "css": ".ds-chip{display:inline-block;font:600 .8rem ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:#DCD2CA}.ds-chip-on{background:rgba(255,106,26,.16);border-color:rgba(255,138,61,.28);color:#FFC08A}"
+    },
+    {
+      "name": "App Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Text tabs in muted smoke; the active tab inverts to white.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-active\" href=\"#\">Tasks</a><a href=\"#\">Submissions</a><a href=\"#\">Wallet</a></nav>",
+      "css": ".ds-nav{display:flex;gap:4px;font-family:Manrope,system-ui,sans-serif}.ds-nav a{padding:8px 12px;border-radius:8px;color:#B5A79C;text-decoration:none;font-weight:500;transition:background-color 150ms ease,color 150ms ease}.ds-nav a:hover{color:#fff}.ds-nav a.ds-active{background:#fff;color:#120B07}.ds-nav a:focus-visible{outline:3px solid #FF9B42;outline-offset:2px}"
+    },
+    {
+      "name": "Review Actions",
+      "kind": "custom",
+      "description": "Console reject/approve pair in status tints; the approve tick draws in.",
+      "html": "<div class=\"ds-review\"><button class=\"ds-rv ds-rv-no\">Reject</button><button class=\"ds-rv ds-rv-ok\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path class=\"ds-tick\" d=\"M20 6 9 17l-5-5\"/></svg>Approve</button></div>",
+      "css": ".ds-review{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:280px}.ds-rv{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px;border:0;border-radius:12px;font:700 .9rem Manrope,system-ui,sans-serif;cursor:pointer}.ds-rv-no{background:rgba(255,122,92,.12);color:#FF7A5C}.ds-rv-ok{background:rgba(74,222,128,.12);color:#4ADE80;box-shadow:inset 0 0 0 1px rgba(74,222,128,.35)}.ds-tick{stroke-dasharray:24;stroke-dashoffset:24;animation:ds-tick 6s cubic-bezier(0.23,1,0.32,1) infinite}@keyframes ds-tick{0%,38%{stroke-dashoffset:24}50%,100%{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){.ds-tick{animation:none;stroke-dashoffset:0}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Warm Control Room",
+    "overview": "Borgs is a modern dark product platform played straight: a warm near-black room lit from above by a soft orange bloom, with frosted glass panels floating in it. The product itself is the hero. On the public landing (Persuade) a working review console, with a clip frame, its metadata record and approve/reject controls, sits directly under the headline; in the contributor and admin app (Operate) the same glass, hairlines and status colours carry tables, queues and forms at a tighter density. The user chose this category standard against their own references (dark premium dashboards with warm brown/orange glass, monochrome cinematic landings, analytics UI) and rejected a concept-led darkroom world; that choice is standing.\n\nThe palette is orange and white on warm black. Orange is light, not paint: it arrives as the background bloom, the brand tile's gradient, a deep ember fill on primary actions, and small warm accents on borders and icons. White carries type and the inverted \"selected\" state. Status is a separate, functional vocabulary (green approved, amber pending, coral rejected) that never doubles as decoration.\n\nType is a single confident sans (Manrope, heavy and tightly tracked at display sizes) with one editorial voice: Instrument Serif italic for the accent phrase inside a landing headline. Data (clip IDs, durations, metadata, chips) is set in the system monospace with tabular numerals, because honest metadata is the product.",
+    "keyCharacteristics": [
+      "Warm black ground (never neutral grey, never pure #000) with radial orange blooms.",
+      "Frosted glass panels: translucent warm-brown fill, 1px white hairline, inset top highlight, blur.",
+      "Primary action is a deep ember gradient with white text; brand orange itself is too light to carry white text.",
+      "One serif italic accent phrase per landing headline; everything else Manrope.",
+      "Monospace with tabular numerals for every piece of clip data and money.",
+      "Status colours are semantic only: green approved, amber pending, coral rejected.",
+      "Conversion surfaces move: travelling gradient border, pulse, approve tick drawing in, form success check."
+    ],
+    "rules": [
+      { "name": "The Light Not Paint Rule", "body": "Signal Orange is light in the room: blooms, gradients, rings, small marks. Text-bearing orange surfaces use the Ember Action gradient or the deep feature-panel radial, never flat Signal Orange under white text.", "section": "colors" },
+      { "name": "The Semantic Status Rule", "body": "Green, amber and coral mean approved, pending and rejected. They appear as a tinted 12-14% background with the full-strength colour as text, never as decoration, never as a brand accent.", "section": "colors" },
+      { "name": "The Warm Black Rule", "body": "The ground is #070505-family warm black with an orange bloom at the top. Neutral greys and pure black read as a different product.", "section": "colors" },
+      { "name": "The One Accent Phrase Rule", "body": "A landing headline gets at most one Instrument Serif italic phrase, and it carries the point of the sentence. Body, UI and the whole app stay in Manrope.", "section": "typography" },
+      { "name": "The Honest Record Rule", "body": "Any value that comes from the clip record (ID, duration, device, pay, balance) is monospace or tabular. Prose never imitates data and data never sits in proportional, jittering numerals.", "section": "typography" },
+      { "name": "The Lit From Above Rule", "body": "Every raised object is lit by the room: inset top highlight, soft dark fall-off below, and an orange under-glow only on the few objects that matter most (console, pilot form, feature panel).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do build every surface on Warm Black with a top orange radial bloom; frosted glass panels with a 1px hairline and inset top highlight sit on it.",
+      "Do fill primary actions with the Ember Action gradient (#C8450A to #AE3A07) and white text; reserve the travelling gradient border for the one or two conversion CTAs on a page.",
+      "Do use green, amber and coral only for approved, pending and rejected, as tinted fill with full-strength text.",
+      "Do set clip IDs, metadata, pay and balances in monospace or tabular numerals.",
+      "Do give a landing headline at most one Instrument Serif italic phrase in Amber Light.",
+      "Do invert to white with near-black text for the selected item in toggles and app navigation.",
+      "Do label sample data and illustrative stock wherever product UI or photos appear.",
+      "Do stop every ambient animation under prefers-reduced-motion."
+    ],
+    "donts": [
+      "Don't put white text on flat Signal Orange (#FF6A1A); it fails contrast. Use the ember gradient.",
+      "Don't use neutral greys or pure black for the ground, or a light theme; the system is dark-only.",
+      "Don't use green, amber or coral as brand accents or decoration.",
+      "Don't add customer logos, testimonials, counts, dataset hours or any other evidence the product does not have.",
+      "Don't introduce the darkroom or any other decorative concept world; the user rejected it in favour of the category standard.",
+      "Don't add hard offset shadows, thick outlines or sharp corners; depth is glass, hairline and soft light.",
+      "Don't load the serif in the app or use it outside a headline accent phrase."
+    ]
+  }
+}

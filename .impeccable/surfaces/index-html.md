@@ -14,7 +14,7 @@ Audience and action: buyers request a pilot through the form in the page; contri
 
 THESIS: The category standard, played straight at the level of the user's references: a modern dark product platform where the review console itself is the hero. Refuses decorative concept worlds the user rejected.
 
-OWN-WORLD: near-black warm ground with a soft orange light bloom; frosted dark glass panels with hairline borders; orange gradient for primary actions and the brand mark; lime only for approved and positive states; Manrope for UI and body, Instrument Serif italic for accent words in headlines; lucide line icons.
+OWN-WORLD: near-black warm ground with a soft orange light bloom; frosted dark glass panels with hairline borders; orange gradient for primary actions and the brand mark; green (#4ADE80) only for approved and positive states; Manrope for UI and body, Instrument Serif italic for accent words in headlines; lucide line icons.
 
 STORY: buyer sees the review console working (clip, record, approve), understands spec-driven collection with consent, opens the pilot form; contributor sees pay per approved video and starts sign-up.
 
